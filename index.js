@@ -3,22 +3,32 @@ var path = require('path');
 
 module.exports = {
   init: function(file, cb) {
+     var that = this;
      process.on('uncaughtException', function(err) {
- 	console.log(err.stack);
-	process.exit(1);
+	that.blame(err.stack, function (err, res) {
+	   if (err) return;
+	   console.log(res);
+  	   process.exit(1)
+        });
      });
   },
-  blame: function (stack) {
-     var dirname = path.dirname(file);
-     var filename = path.basename(file); 
-     exec('git blame ' + filename, {cwd: dirname}, function (error, stdout, stderr) {
+  blame: function (stack, callback) {
+     var stack = stack.split(/\n/),
+	 error = stack[0],
+	 line = /\(.*\)$/.exec(stack[1])[0],
+	 filename = null;
+	 
+     line = line.substring(1, line.length-1);
+
+     line = line.split(':');
+    
+     filename = line[0]; 
+     exec('git blame ' + filename + ' -L' + line[1] + ',+1', function (error, stdout, stderr) {
      	if (error !== null) {
        	   console.log('exec error: ' + error);
-       	   return cb(new Error(error));
+       	   return callbackb(new Error(error));
       	}
-      	var lines = stdout.split("\n");
-      	lines.unshift(""); // make the line numbers match
-      	cb(null, lines);
+      	callback(null, stdout);
      });
   }
 };
