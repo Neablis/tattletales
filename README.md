@@ -12,6 +12,7 @@ A library for blaming a user for a uncaught exception
   var tattletale = require('tattle-tale'),
       tattletale.init(function (res) {
 	console.log(res);
+	// Please i beg of you, system.exit here, die with honor
       });
 
   res - 
