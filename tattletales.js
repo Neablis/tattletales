@@ -1,5 +1,4 @@
 var exec = require('child_process').exec;
-var path = require('path');
 
 module.exports = {
   init: function(callback) {
@@ -8,19 +7,22 @@ module.exports = {
     (function (fn) {
     	process.on('uncaughtException', function(err) {
     	  that.blame(err.stack, function (err, res) {
-    	    if (err) return;
-    	    fn(res);
+    	    if (err) return fn(err);
+    	    fn(undefined, res);
         });
       });
     })(callback);
+    return this;
   },
   blame: function (stack, callback) {
-    var stack = stack.split(/\n/),
-  	 error = null,
-  	 line = null,
-  	 filename = null;
+    var orig_stack = stack,
+  	  error = null,
+  	  line = null,
+  	  filename = null;
+
+    stack = stack.split(/\n/);
     
-    if (stack.length < 2) callback(err);	
+    if (stack.length < 2) return callback('Error parsing stack');	
 
     error = stack[0];
 	
@@ -31,34 +33,54 @@ module.exports = {
     
     filename = line[0]; 
     exec('git blame ' + filename + ' --line-porcelain -L' + line[1] + ',+1', function (err, stdout, stderr) {
-      if (err !== null) {
-        return callback(err);
-      }
+      if (err !== null) return callback(err);
+
       var response, 
           author,
-          email;
+          email,
+          obj;
 
 	    response = stdout.split("\n");
       author = response[1].replace("author ", "");
       email = response[2].replace("author-mail", "").replace("<", "").replace(">", "").trim();
 
-      callback(null, {
+      obj = {
         blame: author, 
         email: email, 
         error: error, 
         filename: filename, 
         line: line[1], 
-        stack: stack
-      });
+        stack: orig_stack
+      };
+
+      return callback(null, obj);
     });
+    return this;
   },
   primary_caretaker: function (file, callback) {
     exec("git blame --line-porcelain "  + file + " | sed -n 's/^author-mail //p' | sort | uniq -c | sort -rn", function (err, stdout, stderr) {
       if (err !== null) {
         return callback(err);
       }
-      var response = stdout.replace(/(\r\n|\n|\r)/gm,"");
-      console.log(response);
+
+      var response = stdout.split("\n"),
+          users = [],
+          count = 0;
+
+      for (;count < response.length; count++) {
+        if (response[count] !== '') {
+          var string = response[count].trim();
+          string = string.split(" ");
+          users.push({
+            user: string[1],
+            count: string[0]
+          }); 
+        }
+      }
+      
+      return callback (null, users);
     });
+
+    return this;
   }
 };

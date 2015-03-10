@@ -5,28 +5,41 @@ A library for blaming a user for a uncaught exception
 
 ## Installation
 
-  npm install tattletales --save
+npm install tattletales --save
 
 ## Usage
 
-  var tattletale = require('tattletales'),
-      tattletale.init(function (res) {
-	console.log(res);
-	// Please i beg of you, system.exit here, die with honor
-      });
+```
+var tattletale = require('tattletales');
 
-  res - 
-     { 
-	blame: <Line of code to blame for error with user and function>,
-  	error: <The error that caused the uncaught>,
-	filename: <The filename of the file that caused the error>,
-  	line: <The line number of the error>
-      }
-         
+tattletale.init(function (res) {
+  console.log(res);
+  // Exit gracefully
+});
+
+res =
+  { 
+    blame: <Name of user to blame>,
+    email: <Email of user to blame>,
+    error: <The error that caused the uncaught>,
+    filename: <The filename of the file that caused the error>,
+    line: <The line number of the error>,
+    stack: <original stack trace>
+  }
+
+
+tattletale.primary_caretaker(file, function (err, res) {
+  console.log(res);
+});
+
+res = [
+  {user: <User with lines attributed to them>, count: <Count of lines this user atributed},
+];
+'''   
 
 ## Tests
 
-  npm test
+npm test
 
 ## Contributing
 
@@ -36,6 +49,8 @@ Add unit tests for any new or changed functionality. Lint and test your code.
 ## Release History
 
 * 0.0.1 Initial release
+* 0.0.2 Added email, beggining of designated caretakers of code
+* 0.0.3 Added caretaker functionality
 
 ## Todo 
 
