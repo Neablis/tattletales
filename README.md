@@ -1,15 +1,15 @@
-tattle-tale
+tattletales
 =========
 
 A library for blaming a user for a uncaught exception
 
 ## Installation
 
-  npm install tattle-tale --save
+  npm install tattletales --save
 
 ## Usage
 
-  var tattletale = require('tattle-tale'),
+  var tattletale = require('tattletales'),
       tattletale.init(function (res) {
 	console.log(res);
 	// Please i beg of you, system.exit here, die with honor
