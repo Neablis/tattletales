@@ -9,7 +9,7 @@ npm install tattletales --save
 
 ## Usage
 
-```
+```javascript
 var tattletale = require('tattletales');
 
 tattletale.init(function (res) {
@@ -35,7 +35,8 @@ tattletale.primary_caretaker(file, function (err, res) {
 res = [
   {user: <User with lines attributed to them>, count: <Count of lines this user atributed},
 ];
-'''   
+```
+
 
 ## Tests
 
