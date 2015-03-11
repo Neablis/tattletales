@@ -6,6 +6,7 @@ module.exports = {
     callback = callback || function (res) { console.log(res); };
     (function (fn) {
     	process.on('uncaughtException', function(err) {
+        console.log(err);
     	  that.blame(err.stack, function (err, res) {
     	    if (err) return fn(err);
     	    fn(undefined, res);
@@ -21,21 +22,21 @@ module.exports = {
   	  filename = null;
 
     stack = stack.split(/\n/);
-    
-    if (stack.length < 2) return callback('Error parsing stack');	
+
+    if (stack.length < 2) return callback('Error parsing stack');
 
     error = stack[0];
-	
+
     line = /\(.*\)$/.exec(stack[1]);
     line = line[0];
     line = line.substring(1, line.length-1);
     line = line.split(':');
-    
-    filename = line[0]; 
+
+    filename = line[0];
     exec('git blame ' + filename + ' --line-porcelain -L' + line[1] + ',+1', function (err, stdout, stderr) {
       if (err !== null) return callback(err);
 
-      var response, 
+      var response,
           author,
           email,
           obj;
@@ -45,11 +46,11 @@ module.exports = {
       email = response[2].replace("author-mail", "").replace("<", "").replace(">", "").trim();
 
       obj = {
-        blame: author, 
-        email: email, 
-        error: error, 
-        filename: filename, 
-        line: line[1], 
+        blame: author,
+        email: email,
+        error: error,
+        filename: filename,
+        line: line[1],
         stack: orig_stack
       };
 
@@ -74,10 +75,10 @@ module.exports = {
           users.push({
             user: string[1],
             count: string[0]
-          }); 
+          });
         }
       }
-      
+
       return callback (null, users);
     });
 
