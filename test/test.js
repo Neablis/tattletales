@@ -1,16 +1,33 @@
-var expect = require('chai').expect,
-    blame  = require('../tattletales');
+var assert = require('assert'),
+    blame = require('../tattletales');
 
-describe('#Blame', function() {
-  it('Catches errors and return the user and line number', function(done) {
-      blame.init(function (res) {
-	      console.log('\n\n', res, '\n\n');
-        expect(true).should.equal(true);
-        done();
-      });
-
-      expect(function () {
+function throwNextTick(error) {
+    process.nextTick(function () {
+        // DO NOT MOVE FROM LINE 7
         undefinedFunction();
-      }).to.throw('undefinedFunction is not defined');
-  });
-});
+    })
+}
+
+describe("tattletales", function (next) {
+    it("Throw a error and catch it", function (next) {
+        //Removing and saving the default process handler
+        var recordedError = null;
+        var originalException = process.listeners('uncaughtException').pop();
+        process.removeListener('uncaughtException', originalException);
+
+        blame.init(function (err, res) {
+          // Removing the process handler my blame added
+          var newException = process.listeners('uncaughtException').pop();
+          process.removeListener('uncaughtException', newException);
+
+          // Putting back on mochas process handler
+          process.listeners('uncaughtException').push(originalException);
+
+          assert.equal(res.error, 'ReferenceError: undefinedFunction is not defined');
+          assert.equal(res.line, 7);
+          assert.equal(res.filename, '/Users/mitchelld3/tattletales/test/test.js');
+          next();
+        });
+        throwNextTick();
+    })
+})

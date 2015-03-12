@@ -6,7 +6,6 @@ module.exports = {
     callback = callback || function (res) { console.log(res); };
     (function (fn) {
     	process.on('uncaughtException', function(err) {
-        console.log(err);
     	  that.blame(err.stack, function (err, res) {
     	    if (err) return fn(err);
     	    fn(undefined, res);
@@ -27,9 +26,12 @@ module.exports = {
 
     error = stack[0];
 
-    line = /\(.*\)$/.exec(stack[1]);
+    line = /\/.*/.exec(stack[1]);
+    if (line[0].slice(-1) === ')') {
+      line[0] = line[0].substring(0, line[0].length-1);
+    }
     line = line[0];
-    line = line.substring(1, line.length-1);
+    line = line.substring(0, line.length-1);
     line = line.split(':');
 
     filename = line[0];
